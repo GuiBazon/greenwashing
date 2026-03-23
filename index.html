@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greenwashing - A Ilusão do Verde</title>
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --accent: #00ff88;
+            --danger: #ff5555;
+            --warning: #ffc107;
+            --card-bg: #1a1e24;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            overflow: hidden; 
+            user-select: none; 
+        }
+        
+        #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 6px; background: rgba(255,255,255,0.1); z-index: 100; }
+        #progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width 0.4s ease; box-shadow: 0 0 10px var(--accent); }
+        
+        .click-area { position: fixed; top: 0; height: 100vh; z-index: 50; cursor: pointer; }
+        .click-left { left: 0; width: 30%; } 
+        .click-right { right: 0; width: 70%; } 
+
+        .nav-arrow { position: fixed; top: 50%; transform: translateY(-50%); font-size: 3rem; color: rgba(255,255,255,0.1); z-index: 60; transition: all 0.3s; pointer-events: none; }
+        .click-left:hover ~ .arrow-left { color: var(--accent); left: 20px; }
+        .click-right:hover ~ .arrow-right { color: var(--accent); right: 20px; }
+        .arrow-left { left: 10px; }
+        .arrow-right { right: 10px; }
+        
+        .slide { 
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; padding: 5%; 
+            opacity: 0; visibility: hidden; 
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-out; 
+            transform: scale(0.95); z-index: 0; pointer-events: none; 
+            overflow-y: auto; overflow-x: hidden;
+        }
+        .slide.active { opacity: 1; visibility: visible; transform: scale(1); z-index: 1; pointer-events: auto; }
+        
+        h1 { font-size: 5.5rem; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; letter-spacing: -2px; text-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+        h2 { font-size: 3.5rem; color: var(--accent); margin-bottom: 30px; }
+        p { font-size: 2rem; color: var(--text-muted); max-width: 1000px; line-height: 1.4; margin-bottom: 20px; }
+        strong { color: var(--text-main); font-weight: 700; }
+        
+        .highlight { color: var(--danger); font-weight: bold; }
+        .success { color: var(--accent); font-weight: bold; }
+        .stat-huge { font-size: 7rem; font-weight: 900; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+        .stat-sub { font-size: 1.5rem; color: var(--warning); margin-top: -10px; margin-bottom: 20px; font-weight: bold; }
+        
+        .grid { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; margin-top: 20px; width: 100%; max-width: 1200px; }
+        .card { background: var(--card-bg); padding: 30px; border-radius: 15px; flex: 1; min-width: 300px; border-top: 4px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: left; }
+        .card h3 { font-size: 2.2rem; margin-bottom: 15px; color: var(--text-main); }
+        .card p { font-size: 1.5rem; margin-bottom: 10px; }
+        
+        .list-item { background: var(--card-bg); margin: 10px 0; padding: 20px; border-radius: 10px; border-left: 5px solid var(--accent); text-align: left; max-width: 900px; width: 100%; display: flex; align-items: center; gap: 20px; }
+        .list-item h4 { font-size: 2rem; color: var(--text-main); min-width: 250px; }
+        .list-item p { font-size: 1.5rem; margin-bottom: 0; flex: 1; }
+
+        .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; }
+        .team-member { background: rgba(255,255,255,0.05); padding: 15px 30px; border-radius: 10px; font-size: 1.8rem; border: 1px solid rgba(0,255,136,0.2); }
+
+        .hint { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); color: #666; font-size: 1rem; z-index: 10; pointer-events: none; text-align: center; width: 100%; }
+
+        @media (max-width: 992px) {
+            h1 { font-size: 4rem; }
+            h2 { font-size: 2.8rem; }
+            p { font-size: 1.6rem; }
+            .stat-huge { font-size: 5rem; }
+            .team-grid { grid-template-columns: repeat(2, 1fr); }
+            .list-item { flex-direction: column; text-align: center; align-items: center; }
+            .list-item h4 { min-width: auto; margin-bottom: 10px; }
+        }
+
+        @media (max-width: 600px) {
+            .slide { padding: 10% 5% 15% 5%; justify-content: flex-start; } 
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; margin-bottom: 20px; }
+            p { font-size: 1.2rem; margin-bottom: 15px; }
+            .stat-huge { font-size: 4rem; }
+            .stat-sub { font-size: 1.1rem; }
+            
+            .grid { gap: 15px; flex-direction: column; align-items: center; }
+            .card { min-width: 100%; padding: 20px; width: 100%; }
+            .card h3 { font-size: 1.6rem; }
+            .card p { font-size: 1.1rem; }
+            
+            .list-item { padding: 15px; }
+            .list-item h4 { font-size: 1.5rem; }
+            .list-item p { font-size: 1.1rem; }
+            
+            .team-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+            .team-member { padding: 10px 20px; font-size: 1.3rem; }
+            
+            .nav-arrow { display: none; } 
+            .hint { font-size: 0.8rem; bottom: 5px; }
+            
+            .slide.active { overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    
+    <div class="click-area click-left" onclick="prevSlide()"></div>
+    <div class="click-area click-right" onclick="nextSlide()"></div>
+    
+    <div class="nav-arrow arrow-left">❮</div>
+    <div class="nav-arrow arrow-right">❯</div>
+
+    <div class="hint">Toque na ESQUERDA para voltar | Toque na DIREITA para avançar</div>
+
+    <div class="slide active">
+        <h1>GREENWASHING</h1>
+        <p style="font-size: 2rem; color: white;">A Ilusão do Capitalismo Verde</p>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: white;">Equipe de Apresentação</h2>
+        <div class="team-grid">
+            <div class="team-member">Gabriel Braz</div>
+            <div class="team-member">Pedro</div>
+            <div class="team-member">Sofia</div>
+            <div class="team-member">Ulisses</div>
+            <div class="team-member">Kauan</div>
+            <div class="team-member">Leonardo</div>
+            <div class="team-member">Guilherme Bazon</div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2>O que é Greenwashing?</h2>
+        <p>Criado em 1986, é a fusão de <em>"Green"</em> (verde) e <em>"Whitewashing"</em> (encobrimento).</p>
+        <p>A empresa gasta milhões parecendo ecológica, mas <span class="highlight">o impacto negativo continua o mesmo</span>.</p>
+        <div class="stat-sub" style="margin-top: 20px;">DADO: 98% dos produtos que se dizem "verdes" cometem ao menos uma fraude ambiental, segundo estudo da agência TerraChoice.</div>
+    </div>
+
+    <div class="slide">
+        <h2>O Mercado do Engano</h2>
+        <div class="stat-huge">73%</div>
+        <p>dos consumidores brasileiros <strong>priorizam produtos sustentáveis</strong>.</p>
+        <div class="stat-sub">Produtos com apelo "verde" crescem 5,6x mais rápido nas prateleiras.</div>
+        <p>As empresas viram que colocar um selo verde dá lucro imediato.</p>
+    </div>
+
+    <div class="slide">
+        <h2>A Regra do 80/20</h2>
+        <div class="grid">
+            <div class="card" style="border-top-color: var(--accent);">
+                <h3 style="color: var(--accent); font-size: 2.5rem;">80%</h3>
+                <p>Do orçamento corporativo vai para <strong>marketing e propaganda enganosa</strong>.</p>
+            </div>
+            <div class="card" style="border-top-color: var(--danger);">
+                <h3 style="color: var(--danger); font-size: 2.5rem;">20%</h3>
+                <p>É o que realmente vai para <strong>mudanças estruturais e redução de carbono</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2>Como Identificar?</h2>
+        <div class="list-item"><h4>1. Promessas Vagas:</h4><p>"100% natural" (Atenção: Petróleo e arsênico também são naturais).</p></div>
+        <div class="list-item"><h4>2. Selos Falsos:</h4><p>Certificações criadas pela própria marca, sem auditoria de ONGs independentes.</p></div>
+        <div class="list-item"><h4>3. Dados Irrelevantes:</h4><p>Destacar um copo reciclável para esconder o desmatamento massivo da cadeia produtiva.</p></div>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: var(--warning);">Dinâmica: O Teste de Consumo</h2>
+        <p style="color: white;">Levanta a mão quem aqui usa ou já comprou destas marcas:</p>
+        <div class="grid" style="gap: 15px;">
+            <div class="card" style="text-align: center; border-color: white;"><h3>👟 NIKE</h3></div>
+            <div class="card" style="text-align: center; border-color: white;"><h3>🍫 NESTLÉ</h3></div>
+            <div class="card" style="text-align: center; border-color: white;"><h3>👗 SHEIN / ZARA</h3></div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: var(--danger);">A Grande Ilusão</h2>
+        <p style="font-size: 2rem; color: white;">🚨 Todas elas já foram expostas ou processadas por Greenwashing! 🚨</p>
+        <p style="margin-top: 20px;">Elas fazem coleções "sustentáveis", mas a maior parte da produção continua poluindo rios e usando plástico descartável.</p>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: var(--warning);">O Duelo: Quem mente mais?</h2>
+        <p style="color: white;">Na sua opinião, qual destas jogadas enganou mais gente?</p>
+        <div class="grid">
+            <div class="card" style="border-top-color: #888;">
+                <h3 style="text-align: center;">📱 APPLE</h3>
+                <p>Tirou o carregador da caixa para "reduzir lixo eletrônico".</p>
+            </div>
+            <div class="card" style="border-top-color: #00704A;">
+                <h3 style="text-align: center;">☕ STARBUCKS</h3>
+                <p>Proibiu canudos de plástico, mas criou uma tampa inovadora "ecofriendly".</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: var(--danger);">As Duas Mentiram!</h2>
+        <div class="grid">
+            <div class="card" style="border-top-color: #888;">
+                <h3 style="text-align: center;">APPLE</h3>
+                <p>O lixo eletrônico continuou, mas eles lucraram mais de <strong>US$ 6 bilhões</strong> vendendo o carregador à parte.</p>
+            </div>
+            <div class="card" style="border-top-color: #00704A;">
+                <h3 style="text-align: center;">STARBUCKS</h3>
+                <p class="highlight">O detalhe: A nova tampa sem canudo usa MAIS plástico que o copo antigo inteiro!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: var(--warning);">Quem é mais sustentável?</h2>
+        <p style="color: white;">Levanta a mão quem acha que o McDonald's é o mais limpo...</p>
+        <p style="color: white;">Agora, levanta a mão quem acha que é O Boticário!</p>
+        <div class="grid">
+            <div class="card" style="border-top-color: #ffc107;">
+                <h3 style="text-align: center;">🍔 McDONALD'S</h3>
+                <p style="text-align: center;">Tirou os plásticos e canudos das lojas.</p>
+            </div>
+            <div class="card" style="border-top-color: var(--accent);">
+                <h3 style="text-align: center;">🧴 O BOTICÁRIO</h3>
+                <p style="text-align: center;">Usa ingredientes naturais nos produtos.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 class="success">Ponto para O Boticário! 🏆</h2>
+        <p>Enquanto o McDonald's tenta esconder o greenwashing, O Boticário tem ações reais de sustentabilidade:</p>
+        <div class="list-item">
+            <h4 style="color: var(--accent);">Boti Recicla</h4>
+            <p><strong>Maior programa de logística reversa do Brasil</strong>. Mais de 4.000 lojas recebem embalagens vazias e transformam em novos produtos.</p>
+        </div>
+        <div class="list-item" style="border-left-color: var(--danger);">
+            <h4 style="color: var(--danger);">A Realidade do Méqui</h4>
+            <p>O hambúrguer tem pegada hídrica de <strong>2.500 litros de água</strong> e a empresa está ligada a altas taxas de desmatamento para a criação de gado.</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2>Estudo de Caso 1: Fast Fashion</h2>
+        <div class="grid">
+            <div class="card" style="border-top-color: var(--text-muted);">
+                <h3>H&M (A Promessa)</h3>
+                <p>Rotularam <strong>64%</strong> de suas peças como "sustentáveis".</p>
+                <p style="color: var(--warning); font-size: 1rem;">*A indústria da moda gasta 2.700 litros de água para fazer UMA camiseta.</p>
+            </div>
+            <div class="card" style="border-top-color: var(--danger);">
+                <h3 class="highlight">A Realidade</h3>
+                <p>Auditorias provaram que apenas <strong>12%</strong> das fibras possuíam origem reciclada real. As roupas continuavam sendo feitas de plástico (poliéster).</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2>Estudo de Caso 2: Amazon</h2>
+        <p>Prometeram neutralidade de carbono até 2025. Mas a entrega "Prime" cobra seu preço.</p>
+        <div class="stat-huge highlight" style="font-size: 5rem;">+ 15%</div>
+        <p>de <strong>aumento</strong> na pegada de carbono da logística em 2023.</p>
+        <div class="stat-sub">71 milhões de toneladas métricas de CO2 emitidas apenas no ano passado.</div>
+    </div>
+
+    <div class="slide">
+        <h2>Estudo de Caso 3: Alimentação</h2>
+        <div class="grid">
+            <div class="card">
+                <h3 style="color: #ff0000;">Coca-Cola</h3>
+                <p>Foi eleita a <strong>maior poluidora de plásticos do mundo</strong> por 5 anos seguidos.</p>
+                <p style="color: var(--warning); font-size: 1rem;">No Brasil, 3,2 bilhões de garrafas PET vão para o lixo errado todo ano.</p>
+            </div>
+            <div class="card">
+                <h3 style="color: #ffc107;">McDonald's</h3>
+                <p>Apesar da publicidade verde, o modelo de fast-food baseia-se num consumo hiper intensivo de recursos naturais, mascarando o impacto massivo.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2>A Maior Fraude: Dieselgate</h2>
+        <div class="stat-huge highlight" style="font-size: 5rem;">40x Mais Poluição</div>
+        <p>A Volkswagen instalou um software pirata em 11 milhões de carros para fraudar testes ambientais.</p>
+        <p>Na rua, os carros emitiam 40 vezes o limite legal de gases tóxicos.</p>
+        <div class="stat-sub" style="margin-top: 10px;">Custo: US$ 30 bilhões em multas.</div>
+    </div>
+
+    <div class="slide">
+        <h2 style="color: var(--warning);">O Cerco Está Fechando ⚖️</h2>
+        <p style="color: white;">Afinal, como funciona a lei e a fiscalização no Brasil?</p>
+        <div class="grid">
+            <div class="card" style="border-top-color: #ff5555;">
+                <h3 style="text-align: center;">📜 C.D.C.</h3>
+                <p>O Código de Defesa do Consumidor (Art. 37) deixa claro: Greenwashing é <strong>Publicidade Enganosa</strong>. Mentir sobre sustentabilidade é crime.</p>
+            </div>
+            <div class="card" style="border-top-color: var(--accent);">
+                <h3 style="text-align: center;">🚫 CONAR</h3>
+                <p>O Conselho Nacional de Autorregulamentação Publicitária atua direto no marketing e pode <strong>tirar do ar</strong> campanhas mentirosas.</p>
+            </div>
+            <div class="card" style="border-top-color: #ffc107;">
+                <h3 style="text-align: center;">🏛️ IDEC e Senacon</h3>
+                <p>Institutos de defesa do consumidor que investigam as corporações, exigem provas e aplicam <strong>multas milionárias</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h2 style="font-size: 4rem;">Exija Transparência</h2>
+        <div class="list-item" style="background: transparent; border: 2px solid var(--accent);">
+            <h4 style="color: var(--accent);">01. Verifique as fontes</h4>
+            <p>Seja crítico. Selo de quem? Pesquise os órgãos independentes.</p>
+        </div>
+        <div class="list-item" style="background: transparent; border: 2px solid var(--accent);">
+            <h4 style="color: var(--accent);">02. Pressione o mercado</h4>
+            <p>A nossa geração decide o lucro deles. Pare de financiar a ilusão.</p>
+        </div>
+    </div>
+
+    <div class="slide">
+        <h1 style="font-size: 5rem; color: white;">MUITO OBRIGADO!</h1>
+        <p style="color: var(--accent);">Dúvidas ou Perguntas?</p>
+        <p style="margin-top: 20px;">Agradecemos pela atenção e participação de todos.</p>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress-bar');
+        let currentSlide = 0;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                    slide.scrollTop = 0; 
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function nextSlide() { 
+            if (currentSlide < slides.length - 1) { 
+                currentSlide++; 
+                updateSlide(); 
+            } 
+        }
+        
+        function prevSlide() { 
+            if (currentSlide > 0) { 
+                currentSlide--; 
+                updateSlide(); 
+            } 
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') nextSlide();
+            if (e.key === 'ArrowLeft' || e.key === 'Backspace') prevSlide();
+        });
+
+        updateSlide();
+    </script>
+</body>
+</html>
