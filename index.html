@@ -71,6 +71,14 @@
 
         .hint { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); color: #666; font-size: 1rem; z-index: 10; pointer-events: none; text-align: center; width: 100%; }
 
+        /* Estilo comum para as imagens dos QRs */
+        .qr-image {
+            width: 180px; height: 180px; 
+            border-radius: 15px; border: 5px solid white; 
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5); 
+            transition: transform 0.3s;
+        }
+
         @media (max-width: 992px) {
             h1 { font-size: 4rem; }
             h2 { font-size: 2.8rem; }
@@ -105,6 +113,7 @@
             .hint { font-size: 0.8rem; bottom: 5px; }
             
             .slide.active { overflow-y: auto; }
+            .qr-image { width: 150px; height: 150px; }
         }
     </style>
 </head>
@@ -128,13 +137,13 @@
     <div class="slide">
         <h2 style="color: white;">Equipe de Apresentação</h2>
         <div class="team-grid">
-            <div class="team-member">Gabriel Braz</div>
-            <div class="team-member">Pedro</div>
-            <div class="team-member">Sofia</div>
+            <div class="team-member">Guilherme Bazon</div>
+            <div class="team-member">Sofia Belchior</div>
             <div class="team-member">Ulisses</div>
+            <div class="team-member">Pedro</div>
             <div class="team-member">Kauan</div>
             <div class="team-member">Leonardo</div>
-            <div class="team-member">Guilherme Bazon</div>
+            <div class="team-member">Gabriel Braz</div>
         </div>
     </div>
 
@@ -326,12 +335,22 @@
     </div>
 
     <div class="slide">
-        <h1 style="font-size: 5rem; color: white;">MUITO OBRIGADO!</h1>
-        <p style="color: var(--accent);">Dúvidas ou Perguntas?</p>
-        <p style="margin-top: 10px; margin-bottom: 30px;">Agradecemos pela atenção e participação de todos.</p>
-        
-        <img src="qrcodepage.png" alt="QR Code para a Apresentação" style="width: 200px; height: 200px; border-radius: 15px; border: 5px solid white; box-shadow: 0 0 30px rgba(0, 255, 136, 0.5); transition: transform 0.3s;">
-        <p style="font-size: 1.5rem; color: var(--accent); margin-top: 15px; font-weight: bold;">Escaneie para acessar os slides!</p>
+        <h1 style="font-size: 4rem; color: white;">MUITO OBRIGADO!</h1> <p style="color: var(--accent);">Dúvidas ou Perguntas?</p>
+
+        <div class="grid" style="margin-top: 30px; margin-bottom: 30px; gap: 60px; justify-content: center; align-items: flex-start;">
+
+            <div style="display: flex; flex-direction: column; align-items: center; width: 220px;">
+                <img src="qrcodepage.png" alt="QR Code para Acessar Slides" class="qr-image">
+                <p style="font-size: 1.3rem; color: var(--accent); margin-top: 15px; font-weight: bold;">Acessar Slides</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: center; width: 220px;">
+                <img src="qrcoderepo.png" alt="QR Code para Ver Código no GitHub" class="qr-image">
+                <p style="font-size: 1.3rem; color: white; margin-top: 15px; font-weight: bold;">Ver Código (GitHub)</p>
+            </div>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 1.5rem; margin-top: 10px;">Agradecemos pela atenção e participação de todos.</p>
     </div>
 
     <script>
