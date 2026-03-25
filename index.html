@@ -71,7 +71,6 @@
 
         .hint { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); color: #666; font-size: 1rem; z-index: 10; pointer-events: none; text-align: center; width: 100%; }
 
-        /* Estilo comum para as imagens dos QRs */
         .qr-image {
             width: 180px; height: 180px; 
             border-radius: 15px; border: 5px solid white; 
@@ -114,6 +113,39 @@
             
             .slide.active { overflow-y: auto; }
             .qr-image { width: 150px; height: 150px; }
+            
+            /* =========================================
+               Ajustes específicos para o slide final no celular
+               ========================================= */
+            #final-slide { 
+                padding-top: 15%; /* Empurra o conteúdo um pouco para baixo */
+                justify-content: flex-start; /* Alinha no topo para caber tudo empilhado */
+            }
+            #final-slide h1 { 
+                font-size: 2.2rem; /* Reduz muito o tamanho do "Muito Obrigado" */
+                margin-bottom: 10px;
+            }
+            #final-slide p { 
+                font-size: 1.1rem; /* Reduz texto de apoio */
+                margin-bottom: 10px;
+            }
+            #final-slide .qr-grid {
+                gap: 10px; /* Pouco espaço entre os QRs empilhados */
+            }
+            #final-slide .qr-image {
+                width: 120px; /* QR codes menores */
+                height: 120px;
+                border-width: 3px; /* Borda mais fina */
+            }
+            #final-slide .qr-grid p {
+                font-size: 1rem; /* Texto da legenda do QR menor */
+                margin-top: 5px;
+                margin-bottom: 15px; /* Espaço para o próximo QR */
+            }
+            #final-slide .thank-you-msg {
+                margin-top: 15px;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -137,13 +169,13 @@
     <div class="slide">
         <h2 style="color: white;">Equipe de Apresentação</h2>
         <div class="team-grid">
-            <div class="team-member">Guilherme Bazon</div>
-            <div class="team-member">Sofia Belchior</div>
-            <div class="team-member">Ulisses</div>
+            <div class="team-member">Gabriel Braz</div>
             <div class="team-member">Pedro</div>
+            <div class="team-member">Sofia</div>
+            <div class="team-member">Ulisses</div>
             <div class="team-member">Kauan</div>
             <div class="team-member">Leonardo</div>
-            <div class="team-member">Gabriel Braz</div>
+            <div class="team-member">Guilherme Bazon</div>
         </div>
     </div>
 
@@ -334,23 +366,24 @@
         </div>
     </div>
 
-    <div class="slide">
-        <h1 style="font-size: 4rem; color: white;">MUITO OBRIGADO!</h1> <p style="color: var(--accent);">Dúvidas ou Perguntas?</p>
+    <div class="slide" id="final-slide">
+        <h1>MUITO OBRIGADO!</h1>
+        <p style="color: var(--accent);">Dúvidas ou Perguntas?</p>
 
-        <div class="grid" style="margin-top: 30px; margin-bottom: 30px; gap: 60px; justify-content: center; align-items: flex-start;">
+        <div class="grid qr-grid">
 
-            <div style="display: flex; flex-direction: column; align-items: center; width: 220px;">
+            <div class="qr-item-container">
                 <img src="qrcodepage.png" alt="QR Code para Acessar Slides" class="qr-image">
                 <p style="font-size: 1.3rem; color: var(--accent); margin-top: 15px; font-weight: bold;">Acessar Slides</p>
             </div>
 
-            <div style="display: flex; flex-direction: column; align-items: center; width: 220px;">
+            <div class="qr-item-container">
                 <img src="qrcoderepo.png" alt="QR Code para Ver Código no GitHub" class="qr-image">
                 <p style="font-size: 1.3rem; color: white; margin-top: 15px; font-weight: bold;">Ver Código (GitHub)</p>
             </div>
         </div>
 
-        <p style="color: var(--text-muted); font-size: 1.5rem; margin-top: 10px;">Agradecemos pela atenção e participação de todos.</p>
+        <p class="thank-you-msg" style="color: var(--text-muted); font-size: 1.5rem; margin-top: 10px;">Agradecemos pela atenção e participação de todos.</p>
     </div>
 
     <script>
